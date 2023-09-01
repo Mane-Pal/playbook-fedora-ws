@@ -1,0 +1,13 @@
+    # Installs basic extensions into vs code
+    - name: Installing Extensions
+      become: no
+      command: code --install-extension {{ item }}
+      with_items:
+        - ms-python.python
+        - sourcery.sourcery
+        - github.vscode-pull-request-github
+        - github.vscode-github-actions
+        - ms-vscode-remote.remote-containers
+        - ms-vscode-remote.remote-ssh
+      register: result
+      failed_when: '"already installed" not in result.stdout and result.rc != 0'

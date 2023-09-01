@@ -1,0 +1,17 @@
+
+- name: Download DisplayLink RPM
+  get_url:
+    url: "https://github.com/displaylink-rpm/displaylink-rpm/releases/download/v5.8.0/fedora-38-displaylink-1.14.1-1.x86_64.rpm"
+    dest: "/tmp/fedora-38-displaylink-1.14.1-1.x86_64.rpm"
+    mode: '0755'
+
+- name: Install DisplayLink RPM
+  dnf:
+    name: "/tmp/fedora-38-displaylink-1.14.1-1.x86_64.rpm"
+    state: present
+    disable_gpg_check: yes
+
+- name: Install boltctl
+  dnf:
+    name: bolt
+    state: present

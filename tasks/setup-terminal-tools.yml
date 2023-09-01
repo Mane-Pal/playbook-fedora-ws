@@ -1,0 +1,108 @@
+- name: Enable and install zellij
+  block:
+  - name: Enable COPR for zellij
+    command:
+      cmd: dnf copr enable varlad/zellij -y
+    become: yes
+
+  - name: Install zellij from COPR
+    dnf:
+      name: zellij
+      state: present
+    become: yes
+  when: "'zellij' in cli_tools_to_install"
+  
+
+- name: Enable and install lazygit
+  block:
+
+    - name: Check if atim/lazygit COPR repo is enabled
+      command:
+        cmd: dnf copr list
+      register: copr_list
+      changed_when: false
+      ignore_errors: true
+
+    - name: Enable atim/lazygit COPR repo
+      command:
+        cmd: dnf copr enable atim/lazygit -y
+      args:
+        creates: /etc/yum.repos.d/_copr:copr.fedorainfracloud.org:atim:lazygit.repo  # This checks if repo file exists to avoid re-running
+      when: "'atim/lazygit' not in copr_list.stdout"
+
+    - name: Install lazygit
+      dnf:
+        name: lazygit
+        state: present
+
+  when: "'lazygit' in cli_tools_to_install"
+
+- name: Install and enable bat and create alias in zsh
+  block:
+    - name: Install bat
+      dnf:
+        name: bat
+        state: present
+      become: yes
+
+    - name: Enable bat for zsh
+      command:
+        cmd: echo 'alias cat="bat"' >> ~/.zshrc
+      become: yes
+  when: "'bat' in cli_tools_to_install"
+
+- name: Install and enable exa and create alias in zsh
+  block:
+    - name: Install exa
+      dnf:
+        name: exa
+        state: present
+      become: yes
+
+    - name: Enable exa for zsh
+      command:
+        cmd: echo 'alias ls="exa"' >> ~/.zshrc
+      become: yes
+  when: "'exa' in cli_tools_to_install"
+
+- name: Install and enable ripgrep and create alias in zsh
+  block:
+    - name: Install ripgrep
+      dnf:
+        name: ripgrep
+        state: present
+      become: yes
+
+    - name: Enable ripgrep for zsh
+      command:
+        cmd: echo 'alias grep="rg"' >> ~/.zshrc
+      become: yes
+  when: "'ripgrep' in cli_tools_to_install"
+
+- name: Install and enable fd and create alias in zsh
+  block:
+    - name: Install fd
+      dnf:
+        name: fd-find
+        state: present
+      become: yes
+
+    - name: Enable fd for zsh
+      command:
+        cmd: echo 'alias find="fd"' >> ~/.zshrc
+      become: yes
+  when: "'fd' in cli_tools_to_install"
+
+- name: Install and enable fzf and create alias in zsh
+  block:
+    - name: Install fzf
+      dnf:
+        name: fzf
+        state: present
+      become: yes
+
+    - name: Enable fzf for zsh
+      command:
+        cmd: echo 'alias fzf="fzf --height 40% --layout=reverse --border"' >> ~/.zshrc
+      become: yes
+  when: "'fzf' in cli_tools_to_install"

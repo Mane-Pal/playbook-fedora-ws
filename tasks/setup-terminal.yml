@@ -1,0 +1,19 @@
+# Install wezterm setup zsh create zshrc file
+- name: Install alacritty and zsh
+  dnf:
+    name: 
+      - alacritty
+      - zsh
+    state: present
+
+- name: Change default shell to zsh for the user
+  user:
+    name: "{{ ansible_env.USER }}"
+    shell: /bin/zsh
+
+- name: Install Oh-My-Zsh
+  shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  args:
+    creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  become_user: "{{ ansible_env.USER }}"
+  become_method: sudo

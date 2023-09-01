@@ -1,0 +1,52 @@
+---
+- name: Setup Dev Environment on Fedora
+  hosts: localhost
+  vars:
+    dev_tools_to_install:
+      - git
+      # - blueman
+      - docker
+      - pyenv
+      - vscode
+    cli_tools_to_install: # All below is optional.
+      - zellij # terminal multiplexter: github.com/zellij-org/zellij
+      - tmux # alternative to zellij
+      - lazygit 
+      - neovim
+      - bat
+      - fd-find
+      - ripgrep
+      - fzf
+      - exa
+      - htop
+    utils_to_install:
+      - slack
+      - libreoffice
+      - dbeaver # SQL Tool
+      - firefox
+      - chromium
+      - inkscape
+
+  become: yes
+  tasks:
+    # To toggle installations, simply comment/uncomment the following lines
+    - name: Setup terminal and zsh
+      include_tasks: tasks/setup-terminal.yml
+
+    - name: Install base dev tools # Check the file to see what is added and remove as needed.
+      include_tasks: tasks/setup-dev-tools.yml
+
+    - name: Install CLI tools # Check the list, these are optional.
+      include_tasks: tasks/setup-terminal-tools.yml
+
+    - name: Install Util tools # Check the list, slack, dbeaver ,libre-office etc.
+      include_tasks: tasks/setup-util-tools.yml
+
+    - name: Install DisplayLink # This is for intel base systems, last updated (2023-08-28)
+      include_tasks: tasks/setup-displaylink.yml
+
+  handlers:
+    - name: restart docker
+      systemd:
+        name: docker
+        state: restarted

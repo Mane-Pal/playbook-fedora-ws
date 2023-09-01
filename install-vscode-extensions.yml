@@ -1,0 +1,6 @@
+- name: Install vs code extensions
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install VS Code Extensions # This will install vscode and some base extensions.
+      include_tasks: tasks/setup-vscode.yml

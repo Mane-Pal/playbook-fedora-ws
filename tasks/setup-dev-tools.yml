@@ -1,0 +1,114 @@
+---
+
+
+- name: Install git
+  dnf:
+    name: git
+    state: present
+  when: "'git' in dev_tools_to_install"
+
+- name: Install pip 
+  dnf:
+    name: python3-pip
+    state: present
+
+
+- name: Install blueman
+  dnf:
+    name: blueman
+    state: present
+  when: "'blueman' in dev_tools_to_install"
+
+- name: Install docker
+  include_tasks: tasks/setup-docker.yml
+  when: "'docker' in dev_tools_to_install"
+
+- name: Download & Install pyenv
+  block:
+    - name: Download Pyenv
+      shell: curl https://pyenv.run | bash
+      args:
+        creates: "{{ ansible_env.HOME }}/.pyenv"
+      become_user: "{{ ansible_env.USER }}"
+      become_method: sudo
+
+    - name: Add pyenv to the shell profile
+      block:
+        - lineinfile:
+            path: "{{ ansible_env.HOME }}/.zshrc"
+            line: 'export PATH="{{ ansible_env.HOME }}/.pyenv/bin:$PATH"'
+            insertafter: EOF
+          become_user: "{{ ansible_env.USER }}"
+          become_method: sudo
+
+        - lineinfile:
+            path: "{{ ansible_env.HOME }}/.zshrc"
+            line: 'eval "$(pyenv init --path)"'
+            insertafter: EOF
+          become_user: "{{ ansible_env.USER }}"
+          become_method: sudo
+
+        - lineinfile:
+            path: "{{ ansible_env.HOME }}/.zshrc"
+            line: 'eval "$(pyenv virtualenv-init -)"'
+            insertafter: EOF
+          become_user: "{{ ansible_env.USER }}"
+          become_method: sudo
+  when: "'pyenv' in dev_tools_to_install"
+
+- name: Check if python envs installed in pyenv
+  command:
+    cmd: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv versions --bare"
+  register: pyenv_versions
+  changed_when: false
+  become_user: "{{ ansible_env.USER }}"
+  become_method: sudo
+  when: "'pyenv' in dev_tools_to_install"
+
+- name: Install Python 3.11.x using pyenv
+  command:
+    cmd: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv install 3.11"
+    creates: "{{ ansible_env.HOME }}/.pyenv/versions/3.11"
+  when: "'3.11' not in pyenv_versions.stdout"
+  become_user: "{{ ansible_env.USER }}"
+  become_method: sudo
+
+- name: Set Python 3.11.x as the global version
+  command:
+    cmd: "{{ ansible_env.HOME }}/.pyenv/bin/pyenv global 3.11"
+  when: "'3.11' not in pyenv_versions.stdout"
+  become_user: "{{ ansible_env.USER }}"
+  become_method: sudo
+
+- name: Install VS-code
+  block:
+    - name: Import Microsoft GPG key
+      rpm_key:
+        key: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+
+    - name: Set up Microsoft VSCode repo
+      copy:
+        content: |
+          [code]
+          name=Visual Studio Code
+          baseurl=https://packages.microsoft.com/yumrepos/vscode
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+        dest: /etc/yum.repos.d/vscode.repo
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Update package cache
+      dnf:
+        update_cache: yes
+
+    - name: Install Visual Studio Code
+      dnf:
+        name: code
+        state: present
+  when: "'vscode' in dev_tools_to_install"
+
+      

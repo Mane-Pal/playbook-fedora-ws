@@ -1,0 +1,58 @@
+- name: Download and install Slack RPM
+  block:
+    - name: Download Slack RPM
+      get_url:
+        url: https://downloads.slack-edge.com/releases/linux/4.33.90/prod/x64/slack-4.33.90-0.1.el8.x86_64.rpm
+        dest: /tmp/slack.rpm
+        mode: '0755'
+
+    - name: Install Slack
+      dnf:
+        name: /tmp/slack.rpm
+        state: present
+        disable_gpg_check: yes
+  when: "'slack' in utils_to_install"
+
+- name: Install LibreOffice
+  block:
+    - name: Install LibreOffice Suite
+      dnf:
+        name: libreoffice
+        state: present
+  when: "'libreoffice' in utils_to_install"
+
+- name: Install DBeaver using Flatpak
+  block:
+
+    - name: Add flathub repository
+      command:
+        cmd: flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+    - name: Install DBeaver Community Edition from flathub
+      command:
+        cmd: flatpak install flathub io.dbeaver.DBeaverCommunity -y
+  when: "'dbeaver' in utils_to_install"
+
+- name: Install Chromium
+  block:
+    - name: Install Chromium
+      dnf:
+        name: chromium
+        state: present
+  when: "'chromium' in utils_to_install"
+
+- name: Install firefox
+  block:
+    - name: Install firefox
+      dnf:
+        name: firefox
+        state: present
+  when: "'firefox' in utils_to_install"
+
+- name: Install inkscape
+  block:
+    - name: Install inkscape
+      dnf:
+        name: inkscape
+        state: present
+  when: "'inkscape' in utils_to_install"
